@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Hot reload script using inotify
+
+# Define the directory to watch
+WATCH_DIR="."
+
+# Define the command to execute on file change
+RELOAD_COMMAND="your_reload_command_here"
+
+# Function to display usage instructions
+usage() {
+    echo "Usage: $0 <reload_command>"
+    echo "Example: $0 'npm run dev'"
+    exit 1
+}
+
+# Check if reload command is provided
+if [ $# -ne 1 ]; then
+    usage
+fi
+
+# Assign reload command argument to a variable
+RELOAD_COMMAND=$1
+
+# Function to monitor file changes and trigger reload
+hot_reload() {
+    echo "Watching directory '$WATCH_DIR' for changes..."
+    while inotifywait -r -e modify $WATCH_DIR; do
+        echo "Changes detected, reloading..."
+        # Execute the reload command
+        $RELOAD_COMMAND
+        echo "Reload complete."
+    done
+}
+
+# Main process
+echo "Starting hot reload process..."
+hot_reload
+

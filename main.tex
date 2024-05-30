@@ -21,6 +21,8 @@
 \institute{UBB - Mathematics and Computer Science}
 \date{2024}
 
+\titlegraphic{\includegraphics[width=0.3\linewidth]{gdsc}}
+
 \begin{document}
 
 \frame{\titlepage}
@@ -82,7 +84,7 @@ I may mess up during this process, so feel free to correct me.
     \item Shell scripting (POSIX shell) \pause
     \item Cron jobs\pause
     \item Event-driven automation\pause
-    \item Docker\pause
+    \item Tmu\pause
     \item Kernel Modules
 \end{itemize}
 
@@ -113,21 +115,12 @@ I may mess up during this process, so feel free to correct me.
 
 \end{frame}
 
-% 7 SLIDE
-\begin{frame}
-\frametitle{How can shell scripting help a developer?}
-\small
-    The short answer is through automation. \newline \newline
-    But within this process, you will learn a lot about the system, the tools
-    available, and the way they interact with each other. \newline
-
-\end{frame}
-
 % 8 SLIDE
 
 \begin{frame}
 \frametitle{How can a developer benefit?}
 \small
+the short answer is through automation. \newline
 firstly one need to identify the repetitive tasks that can be automated.\newline
 certain tasks have been singled out as being easily controllable.
     \begin{itemize}
@@ -152,21 +145,8 @@ certain tasks have been singled out as being easily controllable.
     For that I will have to draw a picture...
 \end{frame}
 
-
 \begin{frame}
-\frametitle{Environmental variables, permissions, and users}
-\small
-The environment variables are a set of dynamic named values that can affect the
-    way running processes will behave on the system. \newline
-    \newline
-Permissions comes into play to encapsulate the access to the system resources
-    and to protect the system from unauthorized access. \newline
-
-How can them affect us when writing scripts?
-\end{frame}
-
-\begin{frame}
-    \frametitle{In all kinds of way}
+    \frametitle{Environment}
     \small Usually on our machine we only have one user, but you have to
     take into consideartion the root as well. Also you can have multiple users
     asignated to different groups and tasks ( gaming )
@@ -200,6 +180,21 @@ don't understand something, you can raise your hand and ask me to explain it!
 
 \end{frame}
 
+\begin{frame}
+    \frametitle{Where to place the scripts?}
+    \small
+    For the scripts that we will write today, we will place them in the directory
+    of the github repostitory that I have created for this workshop.
+    \newline \newline
+    \textbf{But} in general you can place them in the following directories:
+    \begin{itemize}
+        \item /usr/local/bin
+        \item /usr/bin
+        \item /bin
+        \item ~/.local/bin
+    \end{itemize}
+\end{frame}
+
 % 11 SLIDE
 \begin{frame}
     \frametitle{Our first automatization}
@@ -208,24 +203,32 @@ don't understand something, you can raise your hand and ask me to explain it!
     on a generic project.
 \end{frame}
 
+% \begin{frame}
+%     \frametitle{Let's talk debugging}
+%     \footnotesize
+%     The Bash shell contains no debugger, nor even any debugging-specific commands or constructs
+%     \begin{figure}
+%
+%         \includegraphics[width=0.6\linewidth, left]{fail}
+%
+%         \label{fig:fail}
+%
+%     \end{figure}
+%     We have some tools to help us with that in shell scripting:
+%     \begin{itemize}
+%         \item set -x / -e / -u / -o pipefail
+%         \item out beloved printf
+%         \item dtrace
+%         \item strace
+%     \end{itemize}
+% \end{frame}
+%
 \begin{frame}
-    \frametitle{Let's talk debugging}
-    \footnotesize
-    The Bash shell contains no debugger, nor even any debugging-specific commands or constructs
-    \begin{figure}
-
-        \includegraphics[width=0.6\linewidth, left]{fail}
-
-        \label{fig:fail}
-
-    \end{figure}
-    We have some tools to help us with that in shell scripting:
-    \begin{itemize}
-        \item set -x / -e / -u / -o pipefail
-        \item out beloved printf
-        \item dtrace
-        \item strace
-    \end{itemize}
+    \frametitle{It's not that convienient to run manually a script}
+    \small
+    Now that we wrote a script that archives the old projects,
+    maybe we will forget to run it at specific times or even worse, doing a while
+    loop to check if the time has come.
 \end{frame}
 
 \begin{frame}
@@ -234,7 +237,6 @@ don't understand something, you can raise your hand and ask me to explain it!
     One of the most useful tools for automation is cron. \newline
     It allows you to schedule tasks to run at specific times or intervals. \newline
     But there is more! \newline
-    \large > anacron
 \end{frame}
 
 \begin{frame}
@@ -243,6 +245,17 @@ don't understand something, you can raise your hand and ask me to explain it!
     Cron is started from /etc/rc.d/init.d or /etc/init.d when classical sysvinit scripts are used. In case systemd is enabled, then unit file is installed into /lib/sys‐
        temd/system/crond.service and daemon is started by systemctl start crond.service command. It returns immediately, thus, there is no need to need to start it with  the
        \& parameter.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Anacron is a cron for laptops}
+    \small
+    Well, not only for laptops, but for systems that are not running 24/7. \newline
+    Maybe you have a cron once 8 months, but you shut down your computer
+    every day, then it is a high chanche to miss the job execution. \newline \newline
+    It is a cron job that runs at boot time and checks if the cron jobs have been
+    missed. \newline
+
 \end{frame}
 
 % 10 SLIDE
@@ -280,64 +293,49 @@ don't understand something, you can raise your hand and ask me to explain it!
     Absolutely not! \newline
     You can use the events that are relevant to your day to day tasks. \newline
 \end{frame}
-% 13 SLIDE
-% 14 SLIDE
-% 15 SLIDE
-% 16 SLIDE
-% 17 SLIDE
+
 \begin{frame}
-    \frametitle{Orchestrating multiple servers with Docker}
+    \frametitle{Inotify - the file system events}
     \small
-    Of course we can use Docker to automate the deployment of our applications
+    Inotify is a Linux kernel subsystem that acts to extend filesystems to
+    notice changes to the filesystem, and report those changes to
+    applications. \newline
+    \newline
+    It can be used to modify the create, delete, modify, move etc events
+    that happen on the filesystem. \newline
+    \newline
+    Let's look into an example with hot reloading a C++ program.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Other neat tricks}
+    \small
+    How about never crash your system out of the blue? \newline
+    \newline
+    You can use cgroups to limit the resources that a process can use. \newline
+\end{frame}
+
+\begin{frame}
+    \frametitle{Orchestrating multiple projects with Tmux}
+    \small
+    Of course we will use Tmux to manage multiple projects.\newline
     \begin{figure}
         \includegraphics[width=0.4\linewidth] {bash_poison}
         \label{fig:bash_poison}
     \end{figure}
-    \footnotesize You can also do this is our beloved shell scripts but I think
+    \footnotesize \centering \textbf{Don't forget to poison the docker}
     it's convienient to use Docker for this task.
 \end{frame}
 
 \begin{frame}
-    \frametitle{Install docker}
-    \small
-    Depending on your distro you can install docker with the package manager
-    or you can download the binaries from the official website.
+    \frametitle{Getting your feed wet with Tmux}
+    What is this Tmux thing?
     \newline
-    The script:
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sudo sh get-docker.sh
     \newline
-    also you need to add your user to the docker group
-    \newline
-    sudo usermod -aG docker \$USER
-    \newline
-    add the service to the init system
-    \newline For openrc: sudo rc-update add docker default
-    \newline For systemd: sudo systemctl enable docker
-    \newline Now check if docker is running:
-    \newline docker - -version
-\end{frame}
-
-\begin{frame}
-    \frametitle{Manage containers}
-\end{frame}
-\begin{frame}
-    \frametitle{Mock the frontend}
-\end{frame}
-\begin{frame}
-    \frametitle{Mock the backend}
-\end{frame}
-\begin{frame}
-    \frametitle{Mock the database}
-\end{frame}
-
-\begin{frame}
-    \frametitle{What are we trying to achieve?}
-    \small For this example we will try to deploy a simple web application consisting
-    of a frontend, backend and a database. \newline
-    \newline
-    This is very simple but it can be scaled to a more complex situation
-    at your work or personal projects.
+    It's very simple to use but it can be scaled to a more complex situation
+    at your work or to your personal projects.
+    \newline \newline
+    Let's see how we can use it to manage multiple projects.
 \end{frame}
 % 18 SLIDE
 \begin{frame}
@@ -406,8 +404,8 @@ don't understand something, you can raise your hand and ask me to explain it!
 \begin{frame}
     \frametitle{Let the fun begin}
     \small
-    We will utilize the kernel module to monitor the processes that are
-    running on the system and take some actions based on the events that
+    We will utilize the kernel module to analyze the network trafiic that is
+    running on the system and log the source and destination of the packets
     we will receive.
     \newline
     \newline
@@ -420,26 +418,10 @@ don't understand something, you can raise your hand and ask me to explain it!
     that are available to us.
 \end{frame}
 
-% 19 SLIDE
-% \begin{frame}
-%     \frametitle{Sample frame title}
-%
-%     In this slide, some important text will be
-%     \alert{highlighted} because it's important.
-%     Please, don't abuse it.
-%
-%     \begin{block}{Remark}
-%         Sample text
-%     \end{block}
-%
-%     \begin{alertblock}{Important theorem}
-%         Sample text in red box
-%     \end{alertblock}
-%
-%     \begin{examples}
-%         Sample text in green box. The title of the block is ``Examples".
-%     \end{examples}
-% \end{frame}
+\begin{frame}
+    \frametitle{Let's analyze the kernel module}
+    \small oh boy isn't that fun?
+\end{frame}
 
 \begin{frame}
     \frametitle{Resources}
