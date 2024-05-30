@@ -1,0 +1,31 @@
+#!/bin/bash
+# Root directory
+root_directory=~/Dev
+
+# Function to archive entire directory
+archive_directory() {
+    local dir="$1"
+    tar -cf "$1.tar" -C "$dir" .
+    rm -rf "$dir"
+}
+
+# Array to store directories
+dirs=()
+
+# Find directories older than 3 months
+while IFS= read -r -d '' dir; do
+    # Check if directory is older than 3 months
+    if [[ $(find "$dir" -maxdepth 0 -type d -mtime +200 | wc -l) -gt 0 ]]; then
+        dirs+=("$dir")
+        # Call function to archive entire directory
+        # archive_directory "$dir"
+    fi
+done < <(find "$root_directory" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+
+# Print the list of directories older than 3 months
+if [ ${#dirs[@]} -eq 0 ]; then
+    echo "No subdirectories older than 3 months found."
+else
+    echo "Subdirectories older than 3 months:"
+    printf '%s\n' "${dirs[@]}"
+fi
