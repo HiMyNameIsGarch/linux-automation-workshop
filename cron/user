@@ -1,0 +1,1 @@
+5 8 * * 0 /home/garch/.local/bin/cron/folderize >> /var/log/cron/folderize
